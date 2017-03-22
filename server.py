@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2015-2016 Bitergia
+# Copyright (C) 2016-2017 Bitergia
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,20 +16,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-# Authors:
+# Author:
 #     Maria Peña Hernan
-#
+
+
 import web
 import socketserver
 
-# Web server
-
 PORT=8000
 
-
-#Handler = http.server.SimpleHTTPRequestHandler
 Handler = web.testHTTPRequestHandler
-
 
 httpd = socketserver.TCPServer(("", PORT), Handler)
 print("serving at port", PORT)
