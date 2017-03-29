@@ -245,6 +245,17 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
 
         return html
 
+    def get_page_for_error(self):
+
+        html = '''
+        <html>
+            <head></head>
+                Implement 404, Page Not Found
+            <body></body>
+        </html>
+        '''
+        return html
+
 
     def do_GET(self):
 
@@ -254,23 +265,38 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         is_searchDrug = False
         is_searchCompany = False
         is_patientsex = False
+        is_found = False
+
 
         if self.path == '/':
             main_page = True
+            is_found = True
         elif '/listDrugs' in self.path:
             is_eventDrug = True
+            is_found = True
         elif '/listCompanies' in self.path:
             is_eventCompany = True
+            is_found = True
         elif 'searchDrug' in self.path:
             is_searchDrug = True
+            is_found = True
         elif 'searchCompany' in self.path:
             is_searchCompany = True
+            is_found = True
         elif 'patientsex' in self.path:
             is_patientsex = True
+            is_found = True
+    
 
-        self.send_response(200)
+        if is_found:
+            self.send_response(200)
+        else:
+            self.send_response(404)
+
+
         self.send_header('Content-type','text/html')
         self.end_headers()
+
 
         if main_page:
             html = self.get_main_page()
@@ -295,4 +321,7 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             patientsex = self.get_patient_sex()
             html6 = self.get_page_for_patient_sex(patientsex)
             self.wfile.write(bytes(html6, 'utf8'))
+        else:
+            html7 = self.get_page_for_error()
+            self.wfile.write(bytes(html7, 'utf8'))
         return
