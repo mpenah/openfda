@@ -112,6 +112,16 @@ class OpenFDAParser():
             patient_sex += [event['patient']['patientsex']]
         return patient_sex
 
+    def get_authorizations(self,limite):
+
+        CLIENT = OpenFDAClient()
+        events = CLIENT.get_events(limite)
+        authorizations = []
+        results = events['results']
+        for event in results:
+            authorizations += [event['patient']['drug'][0]['drugauthorizationnumb']]
+        return authorizations
+
 
 class OpenFDAHTML():
 
@@ -150,6 +160,47 @@ class OpenFDAHTML():
         </html>
         """
         return html
+
+    def get_page_extra(self):
+
+        html = """
+        <html>
+            <head>
+                <title>OpenFDA</title>
+                <h1>OpenFDA</h1>
+            </head>
+            <body>
+                <form method="get" action="authorizations">
+                    <input type = "submit" value="Authorizations: Send to OpenFDA"></input>
+                    Limit:
+                    <input type = "text" name="limit"></input>
+                </form>
+
+            </body>
+        </html>
+        """
+        return html
+
+    def get_page_for_authorizations(self, authorizations):
+
+        s = ''
+        for authorization in authorizations:
+            s += '<li>' +authorization+ '</li>'
+
+            html = '''
+            <html>
+            <head> </head>
+            <body>
+                <h1>Authorizations</h1>
+                <ol>
+                    %s
+                </ol>
+            </body>
+            </html>
+            ''' %(s)
+
+        return html
+
 
     def get_page_receive_drugs(self, drugs):
 
@@ -292,6 +343,8 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         is_found = False
         is_secret = False
         is_redirect = False
+        is_extra = False
+        is_authorizations = False
 
 
         if self.path == '/':
@@ -318,6 +371,14 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         elif 'redirect' in self.path:
             is_redirect = True
             is_found = True
+        elif 'extra' in self.path:
+            is_extra = True
+            is_found = True
+        elif 'authorizations' in self.path:
+            is_authorizations = True
+            is_found = True
+
+
 
         if is_secret:
             self.send_response(401)
@@ -368,4 +429,12 @@ class testHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
         elif is_found == False:
             html7 = HTML.get_page_for_error(self)
             self.wfile.write(bytes(html7, 'utf8'))
+        elif is_extra:
+            html8 = HTML.get_page_extra(self)
+            self.wfile.write(bytes(html8, "utf8"))
+        elif is_authorizations:
+            limite = self.path.split('=')[1]
+            authorizations = PARSER.get_authorizations(limite)
+            html9 = HTML.get_page_for_authorizations(self, authorizations)
+            self.wfile.write(bytes(html9, 'utf8'))
         return
